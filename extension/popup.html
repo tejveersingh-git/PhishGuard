@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PhishGuard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 340px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 13px;
+      background: #ffffff;
+      color: #1a1a2e;
+    }
+
+    .header {
+      background: #1a1a2e;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo {
+      width: 28px; height: 28px;
+      background: #534AB7;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; color: white; font-weight: bold;
+    }
+    .header-title { color: #e8e6f0; font-size: 15px; font-weight: 600; }
+    .header-badge {
+      margin-left: auto;
+      font-size: 10px;
+      background: #534AB7;
+      color: #CECBF6;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    .scan-bar { height: 3px; background: #f0f0f0; }
+    .scan-fill {
+      height: 100%; width: 0%;
+      background: #534AB7;
+      border-radius: 0 2px 2px 0;
+    }
+    .scan-fill.animating {
+      animation: scanning 1.8s ease-in-out infinite;
+    }
+    @keyframes scanning {
+      0%   { width: 10%; }
+      50%  { width: 85%; }
+      100% { width: 10%; }
+    }
+
+    .body { padding: 14px 16px 16px; }
+
+    .tabs {
+      display: flex;
+      margin-bottom: 12px;
+      border: 1px solid #e0e0e8;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .tab {
+      flex: 1;
+      padding: 7px;
+      font-size: 11.5px;
+      font-weight: 600;
+      text-align: center;
+      cursor: pointer;
+      background: #f5f5f8;
+      color: #888;
+      border: none;
+      transition: all 0.2s;
+    }
+    .tab.active {
+      background: #534AB7;
+      color: white;
+    }
+
+    .url-box {
+      background: #f5f5f8;
+      border: 1px solid #e0e0e8;
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: 11px;
+      color: #555;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 12px;
+    }
+
+    .input-wrap {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .url-input {
+      flex: 1;
+      padding: 8px 10px;
+      font-size: 11.5px;
+      border: 1px solid #e0e0e8;
+      border-radius: 8px;
+      background: #f5f5f8;
+      color: #1a1a2e;
+      outline: none;
+    }
+    .url-input:focus {
+      border-color: #534AB7;
+      background: #fff;
+    }
+    .check-btn {
+      padding: 8px 12px;
+      background: #534AB7;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .check-btn:hover  { background: #3C3489; }
+    .check-btn:active { transform: scale(0.97); }
+
+    .result-card {
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+    }
+    .result-card.safe    { background: #EAF3DE; border: 1px solid #3B6D11; }
+    .result-card.phish   { background: #FCEBEB; border: 1px solid #A32D2D; }
+    .result-card.warning { background: #FAEEDA; border: 1px solid #854F0B; }
+    .result-card.loading { background: #f5f5f8; border: 1px solid #ddd;    }
+
+    .result-icon {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; margin-bottom: 8px;
+    }
+    .safe    .result-icon { background: #C0DD97; }
+    .phish   .result-icon { background: #F7C1C1; }
+    .warning .result-icon { background: #FAC775; }
+    .loading .result-icon { background: #e0e0e0; }
+
+    .result-label { font-size: 16px; font-weight: 700; margin-bottom: 2px; }
+    .safe    .result-label { color: #27500A; }
+    .phish   .result-label { color: #791F1F; }
+    .warning .result-label { color: #633806; }
+    .loading .result-label { color: #888;    }
+
+    .result-desc { font-size: 11.5px; margin-bottom: 10px; }
+    .safe    .result-desc { color: #3B6D11; }
+    .phish   .result-desc { color: #A32D2D; }
+    .warning .result-desc { color: #854F0B; }
+    .loading .result-desc { color: #999;    }
+
+    .conf-wrap { margin-bottom: 10px; }
+    .conf-label { font-size: 11px; margin-bottom: 4px; font-weight: 600; }
+    .safe    .conf-label { color: #3B6D11; }
+    .phish   .conf-label { color: #A32D2D; }
+    .warning .conf-label { color: #854F0B; }
+
+    .conf-track {
+      height: 6px; border-radius: 3px;
+      background: rgba(0,0,0,0.08);
+    }
+    .conf-fill-bar { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
+    .safe    .conf-fill-bar { background: #639922; }
+    .phish   .conf-fill-bar { background: #E24B4A; }
+    .warning .conf-fill-bar { background: #BA7517; }
+
+    .pills { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+    .pill  { font-size: 10.5px; padding: 3px 9px; border-radius: 10px; font-weight: 500; }
+    .pill.ok   { background: #EAF3DE; color: #27500A; }
+    .pill.bad  { background: #FCEBEB; color: #791F1F; }
+    .pill.warn { background: #FAEEDA; color: #633806; }
+
+    .dot {
+      display: inline-block;
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #aaa; margin-right: 6px;
+      animation: blink 1.2s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+    .footer {
+      border-top: 1px solid #eee;
+      padding: 9px 16px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .footer-btn {
+      font-size: 11px; color: #888;
+      background: none; border: none;
+      cursor: pointer; padding: 0;
+    }
+    .footer-btn:hover { color: #534AB7; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="logo">P</div>
+    <span class="header-title">PhishGuard</span>
+    <span class="header-badge">ML Powered</span>
+  </div>
+
+  <div class="scan-bar">
+    <div class="scan-fill" id="scanFill"></div>
+  </div>
+
+  <div class="body">
+
+    <div class="tabs">
+      <button class="tab active" id="tabCurrent">Current Page</button>
+      <button class="tab"        id="tabManual">Check Any URL</button>
+    </div>
+
+    <div id="panelCurrent">
+      <div class="url-box" id="urlBox">Waiting for URL...</div>
+    </div>
+
+    <div id="panelManual" style="display:none;">
+      <div class="input-wrap">
+        <input type="text" class="url-input" id="urlInput"
+               placeholder="Paste any URL here..." />
+        <button class="check-btn" id="checkBtn">Check</button>
+      </div>
+    </div>
+
+    <div class="result-card loading" id="resultCard">
+      <div class="result-icon" id="resultIcon">⏳</div>
+      <div class="result-label" id="resultLabel">Scanning...</div>
+      <div class="result-desc"  id="resultDesc">Analysing URL with ML model</div>
+
+      <div class="conf-wrap" id="confWrap" style="display:none">
+        <div class="conf-label" id="confLabel">Confidence: 0%</div>
+        <div class="conf-track">
+          <div class="conf-fill-bar" id="confBar" style="width:0%"></div>
+        </div>
+      </div>
+
+      <div class="pills" id="pillsWrap"></div>
+    </div>
+
+    <button id="recheckBtn" style="
+      width:100%; padding:8px; font-size:12px;
+      border-radius:8px; border:1px solid #ddd;
+      background:#f5f5f8; color:#555;
+      cursor:pointer; margin-top:2px;">
+      Recheck
+    </button>
+
+  </div>
+
+  <div class="footer">
+    <button class="footer-btn" id="reportBtn">Report false result</button>
+    <button class="footer-btn" id="helpBtn">Help</button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
