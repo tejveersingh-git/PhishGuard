@@ -27,6 +27,14 @@ print("=" * 40)
 
 
 # ── ROUTES ───────────────────────────────────────────────────────
+@app.route("/")
+def home():
+    return jsonify({
+        "project": "PhishGuard API",
+        "status": "running",
+        "message": "API deployed successfully"
+    })
+
 
 @app.route("/health", methods=["GET"])
 def health():
@@ -35,6 +43,12 @@ def health():
         "message": "PhishGuard API is running"
     })
 
+@app.route("/")
+def home():
+    return jsonify({
+        "project": "PhishGuard API",
+        "status": "running"
+    })
 
 @app.route("/predict", methods=["POST"])
 def predict():
